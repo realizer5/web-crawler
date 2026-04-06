@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@hpcc-js/wasm-graphviz':
+        specifier: ^1.21.2
+        version: 1.21.2
       jsdom:
         specifier: ^28.1.0
         version: 28.1.0
@@ -259,6 +262,9 @@ packages:
     peerDependenciesMeta:
       '@noble/hashes':
         optional: true
+
+  '@hpcc-js/wasm-graphviz@1.21.2':
+    resolution: {integrity: sha512-UKvY3MSI1CfkOsVL6Wgg9m8S0x/28u27NgFX5UG+myTYfxU0Sl6jYKXQkcEQLZfulHKQjgHjz5/Rpw5R0CC3/g==}
 
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
@@ -983,6 +989,8 @@ snapshots:
     optional: true
 
   '@exodus/bytes@1.15.0': {}
+
+  '@hpcc-js/wasm-graphviz@1.21.2': {}
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
 

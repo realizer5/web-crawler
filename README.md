@@ -34,12 +34,12 @@ npm install
 ### Usage
 Run crawler using
 ```bash
-bun start <url> <concurrency> <maxPages>
+npm start <url> <concurrency> <maxPages>
 ```
 
 Example:
 ```bash
-bun start https://example.org 3 10
+npm start https://example.org 3 10
 ```
 
 `<url>` → Starting URL to crawl

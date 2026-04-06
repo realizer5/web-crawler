@@ -7,6 +7,7 @@ import {
 } from "./crawl";
 import pLimit from "p-limit";
 import { writeJSONReport } from "./report";
+import { createGraph } from "./graph";
 
 class ConcurrentCrawler {
     public pages: Record<string, ExtractedPageData> = {};
@@ -31,10 +32,7 @@ class ConcurrentCrawler {
         return await this.limit(async () => {
             try {
                 const res = await fetch(currentURL, {
-                    headers: {
-                        Accept: "text/html",
-                        "User-Agent": "RealCrawler/1.0",
-                    },
+                    headers: { Accept: "text/html", "User-Agent": "seekr/1.0" },
                 });
                 if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
                 const contentType = res.headers.get("content-type");
@@ -92,6 +90,7 @@ async function main() {
             );
         }
         writeJSONReport(pages, "report.json");
+        await createGraph(pages);
     } catch (error) {
         if (error instanceof Error) {
             console.error("Crawler failed: ", error.message);

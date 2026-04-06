@@ -2,12 +2,21 @@ import { URL } from "node:url";
 import { JSDOM } from "jsdom";
 
 function normalizeURL(url: string): string {
-    const urlObj = new URL(url);
-    const result = urlObj.host + urlObj.pathname;
-    if (result.slice(-1) === "/") {
-        return result.slice(0, -1);
+    try {
+        const urlObj = new URL(url);
+        const result = urlObj.host + urlObj.pathname;
+        if (result.slice(-1) === "/") {
+            return result.slice(0, -1);
+        }
+        return result;
+    } catch (error) {
+        if (error instanceof Error) {
+            console.error(`Error normalizing URL: ${url}`, error.message);
+        } else {
+            console.error(`Error normalizing URL: ${url}`, error);
+        }
+        return "";
     }
-    return result;
 }
 
 function removeTrailingSlash(url: string): string {
