@@ -1,10 +1,5 @@
 import { argv } from "node:process";
-import {
-    ExtractedPageData,
-    extractPageData,
-    normalizeURL,
-    removeTrailingSlash,
-} from "./crawl";
+import { ExtractedPageData, extractPageData, normalizeURL } from "./crawl";
 import pLimit from "p-limit";
 import { writeJSONReport } from "./report";
 import { createGraph } from "./graph";
@@ -47,7 +42,6 @@ class ConcurrentCrawler {
     }
     private async crawlPage(currentURL: string): Promise<void> {
         if (this.shouldStop) return;
-        if (!currentURL.startsWith(this.baseURL)) return;
         const normalizedURL = normalizeURL(currentURL);
         if (!this.canVisit(normalizedURL)) return;
         this.visitedURLs.add(normalizedURL);
@@ -58,7 +52,7 @@ class ConcurrentCrawler {
             const data = extractPageData(html, this.baseURL, currentURL);
             this.pages[normalizedURL] = data;
             await Promise.all(
-                data.outgoing_links.map((url) => this.crawlPage(url)),
+                data.internal_links.map((url) => this.crawlPage(url)),
             );
         } catch (error) {
             console.error(`Error crawling ${currentURL}:`, error);
@@ -80,7 +74,7 @@ async function main() {
     const maxPages = Number(argv[4]) || 50;
     console.time("crawl");
     try {
-        const url = removeTrailingSlash(argv[2]);
+        const url = argv[2].endsWith("/") ? argv[2].slice(0, -1) : argv[2];
         const pages = await crawlSiteAsync(url, maxConcurrency, maxPages);
         console.log("Finished crawling.");
         const firstPage = Object.values(pages)[0];

@@ -5,7 +5,6 @@ import {
     getImagesFromHTML,
     getURLsFromHTML,
     normalizeURL,
-    removeTrailingSlash,
 } from "./crawl";
 import { describe, expect, it, test } from "vitest";
 
@@ -29,28 +28,6 @@ describe("normalizeURL", () => {
     it("strips protocol", () => {
         const input = "https://blog.boot.dev/path/";
         const actual = normalizeURL(input);
-        expect(actual).toEqual(expected);
-    });
-});
-
-describe("removeTrailingSlash", () => {
-    const expected = "https://blog.boot.dev/path";
-    it("removes trailing slash", () => {
-        const input = "https://blog.boot.dev/path/";
-        const actual = removeTrailingSlash(input);
-        expect(actual).toEqual(expected);
-    });
-
-    it("leaves url without trailing slash unchanged", () => {
-        const input = "https://blog.boot.dev/path";
-        const actual = removeTrailingSlash(input);
-        expect(actual).toEqual(expected);
-    });
-
-    it("returns empty string for invalid url", () => {
-        const input = "invalid-url";
-        const actual = removeTrailingSlash(input);
-        const expected = "";
         expect(actual).toEqual(expected);
     });
 });
@@ -225,8 +202,7 @@ describe("getImagesFromHTML", () => {
 });
 
 test("extractPageData basic", () => {
-    const inputURL = "https://crawler-test.com";
-    const normalizedURL = normalizeURL(inputURL);
+    const inputURL = "https://blog.boot.dev";
     const inputBody = `
     <html><body>
       <h1>Test Title</h1>
@@ -236,13 +212,16 @@ test("extractPageData basic", () => {
     </body></html>
   `;
 
-    const actual = extractPageData(inputBody, inputURL, normalizedURL);
+    const actual = extractPageData(inputBody, inputURL, inputURL);
     const expected = {
-        url: "crawler-test.com",
+        url: "https://blog.boot.dev",
         heading: "Test Title",
         first_paragraph: "This is the first paragraph.",
-        outgoing_links: ["https://crawler-test.com/link1"],
-        image_urls: ["https://crawler-test.com/image1.jpg"],
+        internal_links: ["https://blog.boot.dev/link1"],
+        external_links: [],
+        internal_links_count: 1,
+        external_links_count: 0,
+        image_urls: ["https://blog.boot.dev/image1.jpg"],
     };
 
     expect(actual).toEqual(expected);
@@ -272,9 +251,9 @@ describe("extractPageData", () => {
 
     it("extracts outgoing links", () => {
         const html = `<a href="/posts">Posts</a>`;
-        const { outgoing_links } = extractPageData(html, baseURL, currentURL);
+        const { internal_links } = extractPageData(html, baseURL, currentURL);
         const expected = "https://blog.boot.dev/posts";
-        expect(outgoing_links).toContain(expected);
+        expect(internal_links).toContain(expected);
     });
 
     it("extracts image urls", () => {
@@ -298,13 +277,13 @@ describe("extractPageData", () => {
 
     it("returns empty arrays when no links or images", () => {
         const html = "<div>nothing</div>";
-        const { outgoing_links, image_urls } = extractPageData(
+        const { internal_links, image_urls } = extractPageData(
             html,
             baseURL,
             currentURL,
         );
         const expected: string[] = [];
-        expect(outgoing_links).toEqual(expected);
+        expect(internal_links).toEqual(expected);
         expect(image_urls).toEqual(expected);
     });
 
@@ -314,7 +293,10 @@ describe("extractPageData", () => {
         expect(data).toHaveProperty("url");
         expect(data).toHaveProperty("heading");
         expect(data).toHaveProperty("first_paragraph");
-        expect(data).toHaveProperty("outgoing_links");
+        expect(data).toHaveProperty("internal_links");
+        expect(data).toHaveProperty("external_links");
+        expect(data).toHaveProperty("internal_links_count");
+        expect(data).toHaveProperty("external_links_count");
         expect(data).toHaveProperty("image_urls");
     });
 
@@ -335,7 +317,10 @@ describe("extractPageData", () => {
             url: currentURL,
             heading: "About Us",
             first_paragraph: "Welcome to our site",
-            outgoing_links: [currentURL],
+            internal_links: [currentURL],
+            external_links: [],
+            internal_links_count: 1,
+            external_links_count: 0,
             image_urls: ["https://blog.boot.dev/img/photo.jpg"],
         };
         expect(actual).toEqual(expected);

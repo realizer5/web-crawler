@@ -1,7 +1,7 @@
 # 🔎 Seekr — Web Crawler CLI
 
 Seekr is a fast and minimal command-line web crawler built with **TypeScript**.
-It allows you to crawl websites with configurable concurrency and page limits, and generates a structured report after execution.
+It allows you to crawl websites with configurable concurrency and page limits, and generates a structured report and a graph that shows connections between pages after execution.
 
 ---
 
@@ -10,7 +10,7 @@ It allows you to crawl websites with configurable concurrency and page limits, a
 - 🌐 Crawl websites from a starting URL
 - ⚡ Configurable concurrency for faster crawling
 - 📄 Limit number of pages to crawl
-- 📊 Generates `report.json` with crawl results
+- 📊 Generates `report.json` & `graph.svg` with crawl results
 - 🧪 Includes tests for core functions
 - 🧱 Built with TypeScript for reliability
 
@@ -20,6 +20,11 @@ It allows you to crawl websites with configurable concurrency and page limits, a
 
 - **TypeScript**
 - **Node.js / npm**
+
+### Dependencies
+- **jsdom** for html parsing
+- **hpcc-js/wasm-graphviz** for network graph
+- **vitest** for testing
 
 ---
 
@@ -47,4 +52,4 @@ npm start https://example.org 3 10
 `<maxPages>` → Maximum pages to crawl
 
 ### Output
-After crawling, Seekr generates `report.json`
+After crawling, Seekr generates `report.json` & `graph.svg`

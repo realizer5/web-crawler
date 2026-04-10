@@ -19,27 +19,6 @@ function normalizeURL(url: string): string {
     }
 }
 
-function removeTrailingSlash(url: string): string {
-    try {
-        const urlObj = new URL(url);
-        const result = urlObj.href;
-        return result.endsWith("/") ? result.slice(0, -1) : result;
-    } catch (error) {
-        if (error instanceof Error) {
-            console.error(
-                `Error removing trailing slash in URL: ${url}`,
-                error.message,
-            );
-        } else {
-            console.error(
-                `Error removing trailing slash in URL: ${url}`,
-                error,
-            );
-        }
-        return "";
-    }
-}
-
 function getH1FromHTML(html: string): string {
     const dom = new JSDOM(html);
     const headingText = dom.window.document
@@ -77,7 +56,9 @@ function getURLsFromHTML(html: string, baseURL: string): string[] {
             const href = linkElement.getAttribute("href");
             if (!href || href.startsWith("javascript:")) continue;
             const urlObj = new URL(href, baseURL);
-            const url = removeTrailingSlash(urlObj.href);
+            const url = urlObj.href.endsWith("/")
+                ? urlObj.href.slice(0, -1)
+                : urlObj.href;
             if (urls.includes(url)) continue;
             urls.push(url);
         } catch (error) {
@@ -85,6 +66,24 @@ function getURLsFromHTML(html: string, baseURL: string): string[] {
         }
     }
     return urls;
+}
+
+function filterURLs(urls: string[], baseURL: string) {
+    const internal_links: string[] = [];
+    const external_links: string[] = [];
+    urls.forEach((link) => {
+        if (link.startsWith(baseURL)) {
+            internal_links.push(link);
+        } else {
+            external_links.push(link);
+        }
+    });
+    return {
+        internal_links,
+        external_links,
+        internal_links_count: internal_links.length,
+        external_links_count: external_links.length,
+    };
 }
 
 function getImagesFromHTML(html: string, baseURL: string): string[] {
@@ -95,7 +94,9 @@ function getImagesFromHTML(html: string, baseURL: string): string[] {
         const src = imgElement.getAttribute("src");
         if (!src) continue;
         const urlObj = new URL(src, baseURL);
-        const url = removeTrailingSlash(urlObj.href);
+        const url = urlObj.href.endsWith("/")
+            ? urlObj.href.slice(0, -1)
+            : urlObj.href;
         if (images.includes(url)) continue;
         images.push(url);
     }
@@ -106,7 +107,10 @@ export type ExtractedPageData = {
     url: string;
     heading: string;
     first_paragraph: string;
-    outgoing_links: string[];
+    internal_links: string[];
+    external_links: string[];
+    internal_links_count: number;
+    external_links_count: number;
     image_urls: string[];
 };
 
@@ -119,15 +123,31 @@ function extractPageData(
     const heading = getH1FromHTML(html);
     const first_paragraph = getFirstParagraphFromHTML(html);
     const outgoing_links = getURLsFromHTML(html, baseURL);
+    const {
+        internal_links,
+        external_links,
+        internal_links_count,
+        external_links_count,
+    } = filterURLs(outgoing_links, baseURL);
     const image_urls = getImagesFromHTML(html, baseURL);
-    return { url, heading, first_paragraph, outgoing_links, image_urls };
+    return {
+        url,
+        heading,
+        first_paragraph,
+        internal_links,
+        external_links,
+        internal_links_count,
+        external_links_count,
+        image_urls,
+    };
 }
+
 export {
     normalizeURL,
-    removeTrailingSlash,
     getH1FromHTML,
     getFirstParagraphFromHTML,
     getURLsFromHTML,
+    filterURLs,
     getImagesFromHTML,
     extractPageData,
 };

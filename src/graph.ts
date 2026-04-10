@@ -13,7 +13,7 @@ export async function createGraph(pageData: Record<string, ExtractedPageData>) {
     for (const page of pages) {
         adjacencyList.set(
             page.url,
-            page.outgoing_links.filter(
+            page.internal_links.filter(
                 (link: string) => link !== page.url && adjacencyList.has(link),
             ),
         );
@@ -22,6 +22,7 @@ export async function createGraph(pageData: Record<string, ExtractedPageData>) {
     let dot = `
     digraph G {
     bgcolor="#0f172a";
+    splines=true;
     rankdir="LR";
   node [
     shape=box,
@@ -38,7 +39,6 @@ export async function createGraph(pageData: Record<string, ExtractedPageData>) {
   ];
 `;
     for (const [src, links] of adjacencyList.entries()) {
-        if (!links) continue;
         for (const dest of links) {
             dot += ` "${src}" -> "${dest}";\n`;
         }
